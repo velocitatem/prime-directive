@@ -112,7 +112,3 @@ Each framework extends the base `Framework` class and implements:
 - `validate_inputs()`: Input validation
 - `calculate()`: Core logic and scoring
 - `get_visualization_data()`: Chart data
-
-## License
-
-Academic use only - Harvard Decision Making Course toolkit.

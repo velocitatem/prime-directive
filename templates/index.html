@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-list me-2"></i>Your Decisions</h2>
+            <a href="{{ url_for('create_decision') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Decision
+            </a>
+        </div>
+
+        {% if decisions %}
+            <div class="row">
+                {% for decision in decisions %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ decision.slug }}</h5>
+                            <p class="card-text text-muted">{{ decision.text }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ decision.created_at[:10] }}
+                                </small>
+                                <span class="badge bg-info">
+                                    {{ decision.frameworks_count }} frameworks
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('decision_detail', slug=decision.slug) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No decisions yet</h4>
+                <p class="text-muted">Create your first decision to get started with framework analysis.</p>
+                <a href="{{ url_for('create_decision') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Decision
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tools me-2"></i>Available Frameworks</h5>
+            </div>
+            <div class="card-body">
+                {% for key, framework in frameworks.items() %}
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-secondary me-2">{{ key }}</span>
+                    <small>{{ framework.name }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>How to Use</h5>
+            </div>
+            <div class="card-body">
+                <ol class="small">
+                    <li>Create a new decision to analyze</li>
+                    <li>Apply different frameworks to evaluate it</li>
+                    <li>Review recommendations and scores</li>
+                    <li>Make informed decisions based on analysis</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

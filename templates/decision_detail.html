@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ decision.decision.text[:50] }}... - Decision Making Toolkit{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-clipboard-check me-2"></i>Decision Details</h4>
+            </div>
+            <div class="card-body">
+                <h5>{{ decision.decision.slug }}</h5>
+                <p class="text-muted">{{ decision.decision.text }}</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Created: {{ decision.decision.created_at[:19] }}
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-edit me-1"></i>
+                            Updated: {{ decision.decision.last_updated[:19] }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar me-2"></i>Framework Analysis</h5>
+            </div>
+            <div class="card-body">
+                {% if decision.frameworks %}
+                    <div class="row">
+                        {% for framework_data in decision.frameworks %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">{{ framework_data.name }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if framework_data.result and framework_data.result.overall_score %}
+                                    <div class="mb-2">
+                                        <strong>Overall Score: {{ "%.2f"|format(framework_data.result.overall_score) }}</strong>
+                                    </div>
+                                    {% endif %}
+                                    {% if framework_data.result and framework_data.result.recommendations %}
+                                    <div class="mb-2">
+                                        <small><strong>Key Recommendations:</strong></small>
+                                        <ul class="small">
+                                            {% for rec in framework_data.result.recommendations[:2] %}
+                                            <li>{{ rec }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No frameworks applied yet. Choose a framework to get started.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tools me-2"></i>Apply Frameworks</h5>
+            </div>
+            <div class="card-body">
+                {% for key, framework in frameworks.items() %}
+                <div class="d-grid gap-2 mb-2">
+                    <a href="{{ url_for('run_framework', slug=slug, framework_key=key) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <span class="badge bg-secondary me-2">{{ key }}</span>
+                        {{ framework.name }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Analysis Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2">
+                    {% set progress = (decision.metadata.completed_frameworks / frameworks|length * 100)|int %}
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress }}%">
+                        {{ progress }}%
+                    </div>
+                </div>
+                <small class="text-muted">
+                    {{ decision.metadata.completed_frameworks }} of {{ frameworks|length }} frameworks completed
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

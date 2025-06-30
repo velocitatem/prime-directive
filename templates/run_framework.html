@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{{ framework.name }} - Decision Making Toolkit{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-cogs me-2"></i>{{ framework.name }}</h4>
+                <small class="text-muted">Decision: {{ slug }}</small>
+            </div>
+            <div class="card-body">
+                <form id="frameworkForm">
+                    {% for field, description in required_inputs.items() %}
+                    <div class="mb-3">
+                        <label for="{{ field }}" class="form-label">
+                            {{ field.replace('_', ' ').title() }}
+                        </label>
+                        
+                        {% if 'scale' in description.lower() or 'score' in description.lower() %}
+                            <input type="number" class="form-control" id="{{ field }}" name="{{ field }}" 
+                                   min="1" max="10" step="0.1" 
+                                   {% if 'optional' not in description.lower() %}required{% endif %}>
+                        {% elif 'percentage' in description.lower() or 'probability' in description.lower() %}
+                            <input type="number" class="form-control" id="{{ field }}" name="{{ field }}" 
+                                   min="0" max="100" step="0.1"
+                                   {% if 'optional' not in description.lower() %}required{% endif %}>
+                        {% elif 'numeric' in description.lower() %}
+                            <input type="number" class="form-control" id="{{ field }}" name="{{ field }}" 
+                                   step="0.01"
+                                   {% if 'optional' not in description.lower() %}required{% endif %}>
+                        {% elif 'months' in description.lower() %}
+                            <input type="number" class="form-control" id="{{ field }}" name="{{ field }}" 
+                                   min="1" step="1"
+                                   {% if 'optional' not in description.lower() %}required{% endif %}>
+                        {% else %}
+                            {% if 'optional' in description.lower() %}
+                                <textarea class="form-control" id="{{ field }}" name="{{ field }}" rows="2"></textarea>
+                            {% else %}
+                                <input type="text" class="form-control" id="{{ field }}" name="{{ field }}" required>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <div class="form-text">{{ description }}</div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('decision_detail', slug=slug) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Decision
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i>Run Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>About This Framework</h5>
+            </div>
+            <div class="card-body">
+                {% if framework_key == '7s' %}
+                <p>The McKinsey 7S Framework analyzes organizational alignment across seven key dimensions to assess readiness for strategic initiatives.</p>
+                <strong>Benchmark:</strong> Scores >7.5 indicate strong alignment.
+                {% elif framework_key == 'vpc' %}
+                <p>The VPC Framework evaluates business models through Value-Price-Cost relationships to identify strategic positioning.</p>
+                <strong>Focus:</strong> Margin analysis and competitive strategy.
+                {% elif framework_key == 'strategic' %}
+                <p>Strategic Inflection Points Framework helps identify when fundamental business changes are needed.</p>
+                <strong>Output:</strong> Transform, Prepare, or Defend recommendation.
+                {% elif framework_key == 'game' %}
+                <p>Game Theory Framework analyzes competitive interactions and strategic moves between players.</p>
+                <strong>Analysis:</strong> Nash equilibria and dominant strategies.
+                {% elif framework_key == 'risk' %}
+                <p>Risk-Reward Matrix evaluates strategic options across risk and reward dimensions for portfolio prioritization.</p>
+                <strong>Quadrants:</strong> High/Low Risk vs High/Low Reward classification.
+                {% endif %}
+            </div>
+        </div>
+        
+        <div id="results" class="card mt-3" style="display: none;">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line me-2"></i>Analysis Results</h5>
+            </div>
+            <div class="card-body" id="resultsContent">
+                <!-- Results will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('frameworkForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = {};
+    
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    try {
+        const response = await fetch(`/api/framework/{{ slug }}/{{ framework_key }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayResults(result.result);
+            document.getElementById('results').style.display = 'block';
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error running analysis: ' + error.message);
+    }
+});
+
+function displayResults(result) {
+    let html = '<div class="mb-3">';
+    
+    if (result.overall_score) {
+        html += `<h6>Overall Score: <span class="badge bg-primary">${result.overall_score.toFixed(2)}</span></h6>`;
+    }
+    
+    html += '<h6>Key Scores:</h6><ul class="small">';
+    for (const [key, value] of Object.entries(result.scores)) {
+        html += `<li><strong>${key.replace('_', ' ')}:</strong> ${typeof value === 'number' ? value.toFixed(2) : value}</li>`;
+    }
+    html += '</ul>';
+    
+    html += '<h6>Recommendations:</h6><ul class="small">';
+    for (const rec of result.recommendations) {
+        html += `<li>${rec}</li>`;
+    }
+    html += '</ul>';
+    
+    html += '</div>';
+    html += '<div class="d-grid">';
+    html += `<a href="{{ url_for('decision_detail', slug=slug) }}" class="btn btn-success">View Full Analysis</a>`;
+    html += '</div>';
+    
+    document.getElementById('resultsContent').innerHTML = html;
+}
+</script>
+{% endblock %}
