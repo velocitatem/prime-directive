@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from frameworks import (
     SevenSFramework, VPCFramework, StrategicInflectionFramework,
-    GameTheoryFramework, RiskRewardFramework
+    GameTheoryFramework, RiskRewardFramework, CynefinFramework
 )
 from cli.decision_manager import DecisionManager
 
@@ -26,7 +26,8 @@ class DecisionCLI:
             'vpc': VPCFramework(),
             'strategic': StrategicInflectionFramework(),
             'game': GameTheoryFramework(),
-            'risk': RiskRewardFramework()
+            'risk': RiskRewardFramework(),
+            'cynefin': CynefinFramework()
         }
     
     def list_frameworks(self):

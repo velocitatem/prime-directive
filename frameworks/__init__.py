@@ -6,6 +6,7 @@ from .vpc_framework import VPCFramework
 from .strategic_inflection_framework import StrategicInflectionFramework
 from .game_theory_framework import GameTheoryFramework
 from .risk_reward_framework import RiskRewardFramework
+from .cynefin_framework import CynefinFramework
 
 __all__ = [
     'Framework',
@@ -13,5 +14,6 @@ __all__ = [
     'VPCFramework',
     'StrategicInflectionFramework',
     'GameTheoryFramework',
-    'RiskRewardFramework'
+    'RiskRewardFramework',
+    'CynefinFramework'
 ]

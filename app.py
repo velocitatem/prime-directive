@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import json
 from frameworks import (
     SevenSFramework, VPCFramework, StrategicInflectionFramework,
-    GameTheoryFramework, RiskRewardFramework
+    GameTheoryFramework, RiskRewardFramework, CynefinFramework
 )
 from cli.decision_manager import DecisionManager
 
@@ -14,10 +14,11 @@ decision_manager = DecisionManager("data")
 # Available frameworks
 FRAMEWORKS = {
     '7s': SevenSFramework(),
-    'vpc': VPCFramework(), 
+    'vpc': VPCFramework(),
     'strategic': StrategicInflectionFramework(),
     'game': GameTheoryFramework(),
-    'risk': RiskRewardFramework()
+    'risk': RiskRewardFramework(),
+    'cynefin': CynefinFramework()
 }
 
 @app.route('/')
